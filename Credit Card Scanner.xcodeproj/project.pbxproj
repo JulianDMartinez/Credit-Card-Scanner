@@ -10,7 +10,6 @@
 		1DEDA04F266529F700FF45B2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEDA04E266529F700FF45B2 /* AppDelegate.swift */; };
 		1DEDA051266529F700FF45B2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEDA050266529F700FF45B2 /* SceneDelegate.swift */; };
 		1DEDA053266529F700FF45B2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEDA052266529F700FF45B2 /* ViewController.swift */; };
-		1DEDA056266529F700FF45B2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1DEDA054266529F700FF45B2 /* Main.storyboard */; };
 		1DEDA058266529F900FF45B2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1DEDA057266529F900FF45B2 /* Assets.xcassets */; };
 		1DEDA05B266529F900FF45B2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1DEDA059266529F900FF45B2 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
@@ -20,7 +19,6 @@
 		1DEDA04E266529F700FF45B2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1DEDA050266529F700FF45B2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		1DEDA052266529F700FF45B2 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		1DEDA055266529F700FF45B2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		1DEDA057266529F900FF45B2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1DEDA05A266529F900FF45B2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1DEDA05C266529F900FF45B2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -56,15 +54,30 @@
 		1DEDA04D266529F700FF45B2 /* Credit Card Scanner */ = {
 			isa = PBXGroup;
 			children = (
+				B9FA9515267E730A00A26483 /* Screens */,
+				B9FA9514267E72F400A26483 /* Support */,
+			);
+			path = "Credit Card Scanner";
+			sourceTree = "<group>";
+		};
+		B9FA9514267E72F400A26483 /* Support */ = {
+			isa = PBXGroup;
+			children = (
 				1DEDA04E266529F700FF45B2 /* AppDelegate.swift */,
 				1DEDA050266529F700FF45B2 /* SceneDelegate.swift */,
-				1DEDA052266529F700FF45B2 /* ViewController.swift */,
-				1DEDA054266529F700FF45B2 /* Main.storyboard */,
 				1DEDA057266529F900FF45B2 /* Assets.xcassets */,
 				1DEDA059266529F900FF45B2 /* LaunchScreen.storyboard */,
 				1DEDA05C266529F900FF45B2 /* Info.plist */,
 			);
-			path = "Credit Card Scanner";
+			path = Support;
+			sourceTree = "<group>";
+		};
+		B9FA9515267E730A00A26483 /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				1DEDA052266529F700FF45B2 /* ViewController.swift */,
+			);
+			path = Screens;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -126,7 +139,6 @@
 			files = (
 				1DEDA05B266529F900FF45B2 /* LaunchScreen.storyboard in Resources */,
 				1DEDA058266529F900FF45B2 /* Assets.xcassets in Resources */,
-				1DEDA056266529F700FF45B2 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -146,14 +158,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		1DEDA054266529F700FF45B2 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				1DEDA055266529F700FF45B2 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		1DEDA059266529F900FF45B2 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -288,7 +292,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
-				INFOPLIST_FILE = "Credit Card Scanner/Info.plist";
+				INFOPLIST_FILE = "Credit Card Scanner/Support/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -307,7 +311,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
-				INFOPLIST_FILE = "Credit Card Scanner/Info.plist";
+				INFOPLIST_FILE = "Credit Card Scanner/Support/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
