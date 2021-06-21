@@ -6,16 +6,27 @@
 //
 
 import UIKit
+import AVFoundation
 
 class ViewController: UIViewController {
+    
+    private let captureSession = AVCaptureSession()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
     }
 
-    func configureView() {
+    private func configureView() {
         view.backgroundColor = .systemTeal
+    }
+    
+    private func setCameraInput() {
+        guard let device = AVCaptureDevice.DiscoverySession(
+            deviceTypes: [.builtInWideAngleCamera, .builtInDualCamera, .builtInTrueDepthCamera],mediaType: .video, position: .back).devices.first else {
+            fatalError("No back camera device found.")
+            }
+
     }
 }
 
