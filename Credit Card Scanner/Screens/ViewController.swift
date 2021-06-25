@@ -107,7 +107,7 @@ class ViewController: UIViewController {
                 }
                 
                 print(rect)
-                self.drawBoundingBox(rect: rect)
+                drawBoundingBox(rect: rect)
                 
                 #warning("Missing isTapped and doPerspectiveCorrection from tutorial.")
             }
