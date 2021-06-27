@@ -106,6 +106,8 @@ class ViewController: UIViewController {
                     return
                 }
                 
+                print("1")
+                
                 print(rect)
                 self.drawBoundingBox(rect: rect)
                 
