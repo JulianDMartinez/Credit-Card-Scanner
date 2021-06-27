@@ -106,8 +106,6 @@ class ViewController: UIViewController {
                     return
                 }
                 
-                print("Print statement for git training.")
-                
                 print(rect)
                 self.drawBoundingBox(rect: rect)
                 
