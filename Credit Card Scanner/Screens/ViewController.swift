@@ -106,6 +106,12 @@ class ViewController: UIViewController {
                     return
                 }
                 
+                print("Added print statement for git training.")
+                print("This is another print statement for git training.")
+                print("This is another print statement for git training.")
+
+                print("1")
+                print("2")
 
                 
                 print(rect)
