@@ -105,16 +105,7 @@ class ViewController: UIViewController {
                     print("There was an error encountered when seeking first memember of results")
                     return
                 }
-                
-                print("Added print statement for git training.")
-                print("This is another print statement for git training.")
-                print("This is another print statement for git training.")
 
-                print("1")
-                print("2")
-                print("3")
-
-                
                 print(rect)
                 self.drawBoundingBox(rect: rect)
                 
