@@ -13,7 +13,10 @@ class ViewController: UIViewController {
     
     private let captureSession      = AVCaptureSession()
     private let videoDataOutput     = AVCaptureVideoDataOutput()
-    private let outlineLayer           = CAShapeLayer()
+    private let outlineLayer        = CAShapeLayer()
+    private let captureButton       = UIButton()
+    private var detectedRectangle   = VNRectangleObservation()
+    private var ciImage             = CIImage()
     
     private lazy var previewLayer   = AVCaptureVideoPreviewLayer(session: captureSession)
     
@@ -25,6 +28,7 @@ class ViewController: UIViewController {
         setCameraOutput()
         showCameraFeed()
         setUpOutlineLayer()
+        configureCaptureButton()
         
     }
     
@@ -95,11 +99,40 @@ class ViewController: UIViewController {
         previewLayer.insertSublayer(outlineLayer, at: 1)
     }
     
+    private func configureCaptureButton() {
+        view.addSubview(captureButton)
+        
+        let buttonHeight: CGFloat = 70
+        let symbolConfiguration = UIImage.SymbolConfiguration(pointSize: buttonHeight - 5, weight: .ultraLight)
+        
+        captureButton.setImage(UIImage(systemName: "camera.circle")?.applyingSymbolConfiguration(symbolConfiguration), for: .normal)
+        captureButton.imageView?.tintColor  = .label
+        captureButton.backgroundColor       = .systemGray6
+        captureButton.layer.cornerRadius    = buttonHeight / 2
+        
+        captureButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        captureButton.addTarget(self, action: #selector(captureButtonTapped), for: .touchUpInside)
+        
+        NSLayoutConstraint.activate([
+            captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -11),
+            captureButton.heightAnchor.constraint(equalToConstant: buttonHeight),
+            captureButton.widthAnchor.constraint(equalToConstant: buttonHeight),
+        ])
+    }
+    
+    @objc func captureButtonTapped() {
+        doPerspectiveCorrection(detectedRectangle, from: ciImage)
+    }
+    
     
     private func detectRectangle(in image: CVPixelBuffer) {
         
+        ciImage = CIImage(cvPixelBuffer: image)
+        
         let request = VNDetectRectanglesRequest { request, error in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [self] in
                 guard let results = request.results as? [VNRectangleObservation] else {
                     print("There was an error obtaining the rectangle observations.")
                     return
@@ -111,9 +144,9 @@ class ViewController: UIViewController {
                     return
                 }
                 
-                self.drawBoundingBox(rect: rect)
+                self.detectedRectangle = rect
                 
-                self.doPerspectiveCorrection(rect, from: image)
+                self.drawBoundingBox(rect: self.detectedRectangle)
                 
 //                #warning("Missing isTapped and doPerspectiveCorrection from tutorial.")
             }
@@ -121,7 +154,7 @@ class ViewController: UIViewController {
         
         request.minimumAspectRatio  = VNAspectRatio(1.3)
         request.maximumAspectRatio  = VNAspectRatio(1.6)
-        request.minimumSize         = Float(0.5)
+        request.minimumSize         = Float(0.4)
         request.maximumObservations = 1
         
         let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: image, options: [:])
@@ -134,27 +167,27 @@ class ViewController: UIViewController {
         
     }
     
-    private func doPerspectiveCorrection(_ observation: VNRectangleObservation, from buffer: CVImageBuffer) {
+    private func doPerspectiveCorrection(_ observation: VNRectangleObservation, from ciImage: CIImage) {
+
+        var image = ciImage
         
-//        var ciImage     = CIImage(cvImageBuffer: buffer)
-//
-//        let topLeft     = observation.topLeft.scaled(to: ciImage.extent.size)
-//        let topRight    = observation.topRight.scaled(to: ciImage.extent.size)
-//        let bottomLeft  = observation.bottomLeft.scaled(to: ciImage.extent.size)
-//        let bottomRight = observation.bottomRight.scaled(to: ciImage.extent.size)
-//
-//        ciImage = ciImage.applyingFilter("CIPerspectiveCorrection", parameters: [
-//            "inputTopLeft"      : CIVector(cgPoint: topLeft),
-//            "inputTopRight"     : CIVector(cgPoint: topRight),
-//            "inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
-//            "inputBottomRight"  : CIVector(cgPoint: bottomRight)
-//        ])
-//
-//        let context = CIContext()
-//        let cgImage = context.createCGImage(ciImage, from: ciImage.extent)
-//        let output  = UIImage(cgImage: cgImage!)
+        let topLeft     = observation.topLeft.scaled(to: ciImage.extent.size)
+        let topRight    = observation.topRight.scaled(to: ciImage.extent.size)
+        let bottomLeft  = observation.bottomLeft.scaled(to: ciImage.extent.size)
+        let bottomRight = observation.bottomRight.scaled(to: ciImage.extent.size)
+
+        image = image.applyingFilter("CIPerspectiveCorrection", parameters: [
+            "inputTopLeft"      : CIVector(cgPoint: topLeft),
+            "inputTopRight"     : CIVector(cgPoint: topRight),
+            "inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
+            "inputBottomRight"  : CIVector(cgPoint: bottomRight)
+        ])
+
+        let context = CIContext()
+        let cgImage = context.createCGImage(image, from: image.extent)
+        let output  = UIImage(cgImage: cgImage!)
         
-//        UIImageWriteToSavedPhotosAlbum(output, nil, nil, nil)
+        UIImageWriteToSavedPhotosAlbum(output, nil, nil, nil)
     }
     
     private func drawBoundingBox(rect: VNRectangleObservation) {
@@ -162,11 +195,10 @@ class ViewController: UIViewController {
         let outlinePath = UIBezierPath()
         
         outlineLayer.lineCap        = .butt
-        outlineLayer.lineJoin       = .miter
-        outlineLayer.miterLimit     = 4.0
+        outlineLayer.lineJoin       = .round
         outlineLayer.lineWidth      = 5.0
         outlineLayer.strokeColor    = UIColor.systemYellow.cgColor
-        outlineLayer.fillColor      = UIColor.clear.cgColor
+        outlineLayer.fillColor      = UIColor.systemYellow.withAlphaComponent(0.25).cgColor
         
         let bottomTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -previewLayer.frame.height)
         
@@ -175,15 +207,13 @@ class ViewController: UIViewController {
         let bottomRight = VNImagePointForNormalizedPoint(rect.bottomRight, Int(previewLayer.frame.width), Int(previewLayer.frame.height))
         let bottomLeft = VNImagePointForNormalizedPoint(rect.bottomLeft, Int(previewLayer.frame.width), Int(previewLayer.frame.height))
         
-        print(topRight, topLeft, bottomRight, bottomLeft)
-        print(topRight.applying(bottomTopTransform), topLeft.applying(bottomTopTransform), bottomRight.applying(bottomTopTransform), bottomLeft.applying(bottomTopTransform))
-        
         outlinePath.move(to: topLeft.applying(bottomTopTransform))
         
         outlinePath.addLine(to: topRight.applying(bottomTopTransform))
         outlinePath.addLine(to: bottomRight.applying(bottomTopTransform))
         outlinePath.addLine(to: bottomLeft.applying(bottomTopTransform))
         outlinePath.addLine(to: topLeft.applying(bottomTopTransform))
+        outlinePath.addLine(to: topRight.applying(bottomTopTransform))
         
         outlineLayer.path = outlinePath.cgPath
         
