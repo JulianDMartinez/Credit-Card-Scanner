@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     
     private let captureSession      = AVCaptureSession()
     private let videoDataOutput     = AVCaptureVideoDataOutput()
-    private let maskLayer           = CAShapeLayer()
+    private let outlineLayer           = CAShapeLayer()
     
     private lazy var previewLayer   = AVCaptureVideoPreviewLayer(session: captureSession)
     
@@ -24,6 +24,7 @@ class ViewController: UIViewController {
         setCameraInput()
         setCameraOutput()
         showCameraFeed()
+        setUpOutlineLayer()
         
     }
     
@@ -80,13 +81,18 @@ class ViewController: UIViewController {
     
     private func showCameraFeed() {
         
-        previewLayer.videoGravity   = .resizeAspectFill
         previewLayer.frame          = view.frame
+        previewLayer.videoGravity   = .resize
         
         view.layer.addSublayer(previewLayer)
         
         captureSession.startRunning()
         
+    }
+    
+    private func setUpOutlineLayer() {
+        outlineLayer.frame = previewLayer.bounds
+        previewLayer.insertSublayer(outlineLayer, at: 1)
     }
     
     
@@ -99,17 +105,17 @@ class ViewController: UIViewController {
                     return
                 }
                 
-                #warning("Missing remove mask function from tutorial.")
+//                #warning("Missing remove mask function from tutorial.")
                 
                 guard let rect = results.first else {
-                    print("There was an error encountered when seeking first memember of results")
                     return
                 }
-
-                print(rect)
+                
                 self.drawBoundingBox(rect: rect)
                 
-                #warning("Missing isTapped and doPerspectiveCorrection from tutorial.")
+                self.doPerspectiveCorrection(rect, from: image)
+                
+//                #warning("Missing isTapped and doPerspectiveCorrection from tutorial.")
             }
         }
         
@@ -128,27 +134,61 @@ class ViewController: UIViewController {
         
     }
     
+    private func doPerspectiveCorrection(_ observation: VNRectangleObservation, from buffer: CVImageBuffer) {
+        
+//        var ciImage     = CIImage(cvImageBuffer: buffer)
+//
+//        let topLeft     = observation.topLeft.scaled(to: ciImage.extent.size)
+//        let topRight    = observation.topRight.scaled(to: ciImage.extent.size)
+//        let bottomLeft  = observation.bottomLeft.scaled(to: ciImage.extent.size)
+//        let bottomRight = observation.bottomRight.scaled(to: ciImage.extent.size)
+//
+//        ciImage = ciImage.applyingFilter("CIPerspectiveCorrection", parameters: [
+//            "inputTopLeft"      : CIVector(cgPoint: topLeft),
+//            "inputTopRight"     : CIVector(cgPoint: topRight),
+//            "inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
+//            "inputBottomRight"  : CIVector(cgPoint: bottomRight)
+//        ])
+//
+//        let context = CIContext()
+//        let cgImage = context.createCGImage(ciImage, from: ciImage.extent)
+//        let output  = UIImage(cgImage: cgImage!)
+        
+//        UIImageWriteToSavedPhotosAlbum(output, nil, nil, nil)
+    }
+    
     private func drawBoundingBox(rect: VNRectangleObservation) {
         
-        let transform   = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -previewLayer.frame.height)
-        let scale       = CGAffineTransform.identity.scaledBy(x: previewLayer.frame.width, y: previewLayer.frame.height)
-        let bounds      = rect.boundingBox.applying(scale).applying(transform)
-        createLayer(in: bounds)
+        let outlinePath = UIBezierPath()
+        
+        outlineLayer.lineCap        = .butt
+        outlineLayer.lineJoin       = .miter
+        outlineLayer.miterLimit     = 4.0
+        outlineLayer.lineWidth      = 5.0
+        outlineLayer.strokeColor    = UIColor.systemYellow.cgColor
+        outlineLayer.fillColor      = UIColor.clear.cgColor
+        
+        let bottomTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -previewLayer.frame.height)
+        
+        let topRight = VNImagePointForNormalizedPoint(rect.topRight, Int(previewLayer.frame.width), Int(previewLayer.frame.height))
+        let topLeft = VNImagePointForNormalizedPoint(rect.topLeft, Int(previewLayer.frame.width), Int(previewLayer.frame.height))
+        let bottomRight = VNImagePointForNormalizedPoint(rect.bottomRight, Int(previewLayer.frame.width), Int(previewLayer.frame.height))
+        let bottomLeft = VNImagePointForNormalizedPoint(rect.bottomLeft, Int(previewLayer.frame.width), Int(previewLayer.frame.height))
+        
+        print(topRight, topLeft, bottomRight, bottomLeft)
+        print(topRight.applying(bottomTopTransform), topLeft.applying(bottomTopTransform), bottomRight.applying(bottomTopTransform), bottomLeft.applying(bottomTopTransform))
+        
+        outlinePath.move(to: topLeft.applying(bottomTopTransform))
+        
+        outlinePath.addLine(to: topRight.applying(bottomTopTransform))
+        outlinePath.addLine(to: bottomRight.applying(bottomTopTransform))
+        outlinePath.addLine(to: bottomLeft.applying(bottomTopTransform))
+        outlinePath.addLine(to: topLeft.applying(bottomTopTransform))
+        
+        outlineLayer.path = outlinePath.cgPath
         
     }
     
-    
-    private func createLayer(in rect: CGRect) {
-        
-        maskLayer.frame         = rect
-        maskLayer.cornerRadius  = 10
-        maskLayer.opacity       = 0.75
-        maskLayer.borderColor   = UIColor.red.cgColor
-        maskLayer.borderWidth   = 5.0
-        
-        previewLayer.insertSublayer(maskLayer, at: 1)
-    
-    }
 }
 
 extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
@@ -163,3 +203,9 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
 }
 
+extension CGPoint {
+   func scaled(to size: CGSize) -> CGPoint {
+       return CGPoint(x: self.x * size.width,
+                      y: self.y * size.height)
+   }
+}
